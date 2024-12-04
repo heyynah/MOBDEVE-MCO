@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "304018851337",
+    "project_id": "genka-0",
+    "storage_bucket": "genka-0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:304018851337:android:3ff42f1438431b82125ad8",
+        "android_client_info": {
+          "package_name": "com.mobdeve.s20.teves.hannah.mco"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcWKWTR1LYJl8wwOM6dm0JFp6YYA_sPhM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
