@@ -32,7 +32,7 @@ public class CharViewHolder extends RecyclerView.ViewHolder {
         // Load image using Glide
         Glide.with(context)
                 .load(charData.getCharImgUrl()) // Load the image URL
-                .placeholder(R.drawable.ganyu) // Optional placeholder
+                .placeholder(R.drawable.ic_character_aether) // Optional placeholder
                 .error(R.drawable.ic_character_aether) // Optional error image
                 .into(charImgView); // Target the ImageView
     }

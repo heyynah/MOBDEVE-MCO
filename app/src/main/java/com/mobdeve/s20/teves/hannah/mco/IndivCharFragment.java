@@ -72,10 +72,11 @@ public class IndivCharFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             String charName = args.getString("CHAR_NAME");
-            CharData charData = getCharacterDataByName(charName);
-            if (charData != null) {
-                displayCharacterData(charData);
-            }
+            getCharacterDataByName(charName, charData -> {
+                if (charData != null) {
+                    displayCharacterData(charData);
+                }
+            });
         }
 
         // Close button listener
@@ -108,35 +109,36 @@ public class IndivCharFragment extends Fragment {
         }
     }
 
-    private CharData getCharacterDataByName(String charName) {
-        List<CharData> allCharacterData = new ArrayList<>(); // Initialize a new list to hold the character data
-        CharData.getCharacterData(allCharacterData, requireContext()); // Pass the list and context to getCharacterData
-
-        for (CharData data : allCharacterData) {
-            if (data.name.equals(charName)) {
-                return data;
-            }
-        }
-        return null;
+    public interface CharacterDataCallback {
+        void onCharacterDataFetched(CharData charData);
     }
 
+    private void getCharacterDataByName(String charName, CharacterDataCallback callback) {
+        CharData.getCharacterData(requireContext(), charDataList -> {
+            for (CharData data : charDataList) {
+                if (data.name.equals(charName)) {
+                    callback.onCharacterDataFetched(data);
+                    return;
+                }
+            }
+            callback.onCharacterDataFetched(null);
+        });
+    }
 
     private void displayCharacterData(CharData charData) {
         if (charData != null) {
             nameHolder.setText(charData.name);
             Picasso.get()
                     .load(charData.getCharImgUrl()) // Pass the URL string
-                    .placeholder(R.drawable.ganyu) // Optional: Placeholder image while loading
                     .error(R.drawable.ic_character_aether) // Optional: Image to show on error
                     .into(imgHolder); // Your ImageView
-
 
             // Ascension Material
             ascensionMaterialList = new ArrayList<>();
             for (Map.Entry<String, Integer> entry : charData.ascensionRequirements.entrySet()) {
                 ascensionMaterialList.add(new CharMaterialData(entry.getKey(), entry.getValue()));
             }
-            ascensionMaterialList.add(new CharMaterialData("Total Mora", charData.ascensionMora));
+//            ascensionMaterialList.add(new CharMaterialData("Total Mora", charData.ascensionMora));
             ascensionAdapter = new CharMaterialAdapter(ascensionMaterialList);
             ascensionRecyclerView.setAdapter(ascensionAdapter);
 
@@ -167,9 +169,7 @@ public class IndivCharFragment extends Fragment {
 
             // Skill Priority
             skillPriorityList = new ArrayList<>();
-            for (String skill : charData.skillPrio) {
-                skillPriorityList.add(new CharMaterialData(skill, 1)); // Assuming quantity is 1 for each skill
-            }
+            skillPriorityList.add(new CharMaterialData(charData.skillPrio, 1)); // Assuming quantity is 1 for the skill
             skillPriorityAdapter = new CharMaterialAdapter(skillPriorityList);
             skillPriorityRecyclerView.setAdapter(skillPriorityAdapter);
         }

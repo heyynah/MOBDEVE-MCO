@@ -26,15 +26,15 @@ public class CharFragment extends Fragment {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         recyclerView.setLayoutManager(gridLayoutManager);
 
-        // Initialize the list to hold character data
-        List<CharData> characterDataList = new ArrayList<>();
-
         // Fetch the character data using the updated method
-        CharData.getCharacterData(characterDataList, requireContext()); // Pass the List and Context
-
-        // Set Adapter with the data
-        CharAdapter adapter = new CharAdapter(characterDataList, false, getContext());
-        recyclerView.setAdapter(adapter);
+        CharData.getCharacterData(requireContext(), new CharData.CharacterDataCallback() {
+            @Override
+            public void onCharacterDataFetched(List<CharData> charDataList) {
+                // Set Adapter with the data
+                CharAdapter adapter = new CharAdapter(charDataList, false, getContext());
+                recyclerView.setAdapter(adapter);
+            }
+        });
 
         return view;
     }
