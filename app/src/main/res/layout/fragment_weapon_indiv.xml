@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="56dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            app:srcCompat="@drawable/wp_inazuma"
+            tools:ignore="MissingConstraints" />
+
+        <!-- Dark overlay with the same height as imageView -->
+        <View
+            android:id="@+id/overlayView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#66000000"
+            app:layout_constraintTop_toTopOf="@+id/imageView"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView"
+            app:layout_constraintStart_toStartOf="@+id/imageView"
+            app:layout_constraintEnd_toEndOf="@+id/imageView" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/btn_close"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="20dp"
+        android:text="x"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:background="@android:color/transparent"
+        android:layout_gravity="end"
+        android:layout_alignParentEnd="true" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="25dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="25dp">
+
+        <ImageView
+            android:id="@+id/weaponImg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:maxWidth="200dp"
+            android:padding="15dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"/>
+
+        <TextView
+            android:id="@+id/weaponName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"/>
+
+        <!-- Refine Requirements Section -->
+        <LinearLayout
+            android:id="@+id/refineRequirementsSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/rounded_background">
+
+            <LinearLayout
+                android:id="@+id/refineRequirementsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:clickable="true">
+
+                <TextView
+                    android:id="@+id/refineRequirementsTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:text="Refinement Requirements"
+                    android:textColor="@color/custom_text_color"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+
+                <ImageView
+                    android:id="@+id/refineArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_arrow_up" /> <!-- Default to down icon -->
+            </LinearLayout>
+
+            <!-- Collapsible section with RecyclerView -->
+            <LinearLayout
+                android:id="@+id/refineMaterialsSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/refineRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/introText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/custom_text_color"
+            android:textSize="15sp"/>
+    </LinearLayout>
+
+</RelativeLayout>

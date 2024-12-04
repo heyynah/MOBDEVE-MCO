@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">MCO</string>
+    <string-array name="days_of_week">
+        <item>Sunday</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+    </string-array>
+    <string-array name="server_regions">
+        <item>America</item>
+        <item>Europe</item>
+        <item>Asia</item>
+        <item>TW, HK, MO</item>
+    </string-array>
+</resources>
