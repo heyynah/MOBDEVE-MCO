@@ -1,0 +1,23 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/charMaterialName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:textColor="@color/custom_text_color" />
+
+    <TextView
+        android:id="@+id/charMaterialAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:textColor="@color/custom_text_color" />
+
+</LinearLayout>
