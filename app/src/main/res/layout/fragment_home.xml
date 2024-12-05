@@ -24,7 +24,6 @@
                 app:srcCompat="@drawable/wp_inazuma"
                 tools:ignore="MissingConstraints" />
 
-            <!-- Dark overlay with the same height as imageView -->
             <View
                 android:id="@+id/overlayView"
                 android:layout_width="0dp"
@@ -49,7 +48,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Title TextView -->
         <TextView
             android:id="@+id/dailyTaskTitle"
             android:layout_width="wrap_content"
@@ -62,14 +60,21 @@
             android:textSize="25sp"
             android:textStyle="bold" />
 
-        <!-- RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/dailyTaskRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp" />
+
+        <TextView
+            android:id="@+id/emptyMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="Tap + to add a new task"
+            android:textColor="@color/custom_card_color"
+            android:fontFamily="monospace"
+            android:visibility="gone" />
     </LinearLayout>
-
-
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

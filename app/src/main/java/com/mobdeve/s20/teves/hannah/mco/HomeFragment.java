@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +32,14 @@ public class HomeFragment extends Fragment {
 
         // Set Adapter with the data
         recyclerView.setAdapter(adapter);
+
+        // Show or hide the empty message based on the presence of tasks
+        TextView emptyMessage = view.findViewById(R.id.emptyMessage);
+        if (dailyTasks.isEmpty()) {
+            emptyMessage.setVisibility(View.VISIBLE);
+        } else {
+            emptyMessage.setVisibility(View.GONE);
+        }
 
         return view;
     }

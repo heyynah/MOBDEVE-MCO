@@ -21,7 +21,9 @@ public class HomeDailiesViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(final HomeDailiesData data, final OnItemClickListener listener, final OnDeleteClickListener deleteListener) {
         view.setOnClickListener(v -> listener.onItemClick(data));
-        deleteButton.setOnClickListener(v -> deleteListener.onDeleteClick(getAdapterPosition()));
+        deleteButton.setOnClickListener(v -> {
+            deleteListener.onDeleteClick(getAdapterPosition());
+        });
     }
 
     public interface OnItemClickListener {

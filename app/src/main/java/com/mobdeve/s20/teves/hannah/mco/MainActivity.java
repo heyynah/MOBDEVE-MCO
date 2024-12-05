@@ -79,6 +79,12 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment(dailyTasks, adapter)).commit();
     }
 
+    public void refreshHome() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new HomeFragment(dailyTasks, adapter))
+                .commit();
+    }
+
     private void showAddDialog() {
         showDialog(null);
     }
@@ -137,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
                     setTaskAlarm(data);
                 }
 
+                refreshHome();
+
                 adapter.notifyDataSetChanged();
                 Toast.makeText(MainActivity.this, data == null ? "Task added!" : "Task updated!", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
@@ -152,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
                     HomeDailiesData data = dailyTasks.get(position);
                     dbHelper.deleteTask(data.getId());
                     adapter.removeItem(position);
+                    refreshHome();
                     Toast.makeText(MainActivity.this, "Task deleted!", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
