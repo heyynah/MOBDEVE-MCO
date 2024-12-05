@@ -26,8 +26,6 @@ public class CharData {
     String charImgUrl; // Changed to String for URL images
     Map<String, Integer> ascensionRequirements;
     int ascensionMora;
-    Map<String, Integer> talentRequirements;
-    int talentMora;
     List<String> bestArtifactSets;
     List<String> bestWeapons;
     String skillPrio;
@@ -36,8 +34,6 @@ public class CharData {
                     String charImgUrl,
                     Map<String, Integer> ascensionRequirements,
                     int ascensionMora,
-                    Map<String, Integer> talentRequirements,
-                    int talentMora,
                     List<String> bestArtifactSets,
                     List<String> bestWeapons,
                     String skillPrio) {
@@ -45,8 +41,6 @@ public class CharData {
         this.charImgUrl = charImgUrl;
         this.ascensionRequirements = ascensionRequirements;
         this.ascensionMora = ascensionMora;
-        this.talentRequirements = talentRequirements;
-        this.talentMora = talentMora;
         this.bestArtifactSets = bestArtifactSets;
         this.bestWeapons = bestWeapons;
         this.skillPrio = skillPrio;
@@ -132,8 +126,6 @@ public class CharData {
                                                 charImgUrl,
                                                 ascensionRequirements,
                                                 0, // Placeholder for ascensionMora
-                                                talentRequirements,
-                                                talentMora,
                                                 bestArtifactSets,
                                                 bestWeapons,
                                                 skillPrio

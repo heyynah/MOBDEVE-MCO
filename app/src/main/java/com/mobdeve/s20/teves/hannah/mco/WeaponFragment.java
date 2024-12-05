@@ -14,23 +14,26 @@ public class WeaponFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        RecyclerView recyclerView;
-        WeaponAdapter adapter;
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_weapon, container, false);
 
         // Initialize RecyclerView
-        recyclerView = view.findViewById(R.id.weaponRecyclerView);
+        RecyclerView recyclerView = view.findViewById(R.id.weaponRecyclerView);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         // Set LayoutManager
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         recyclerView.setLayoutManager(gridLayoutManager);
 
-        // Set Adapter with the data
-        List<WeaponData> weaponDataList = WeaponData.getWeaponData();
-        adapter = new WeaponAdapter(weaponDataList, false);
-        recyclerView.setAdapter(adapter);
+        // Fetch the weapon data using the updated method
+        WeaponData.getWeaponData(requireContext(), new WeaponData.WeaponDataCallback() {
+            @Override
+            public void onWeaponDataFetched(List<WeaponData> weaponDataList) {
+                // Set Adapter with the data
+                WeaponAdapter adapter = new WeaponAdapter(weaponDataList, false, getContext());
+                recyclerView.setAdapter(adapter);
+            }
+        });
 
         return view;
     }

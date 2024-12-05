@@ -26,11 +26,11 @@ public class IndivCharFragment extends Fragment {
     private TextView nameHolder;
     private ImageView imgHolder;
     private Button btnClose;
-    private ImageView ascensionArrow, talentArrow, bestArtifactsArrow, bestWeaponsArrow, skillPriorityArrow;
-    private LinearLayout ascensionMaterialHolder, talentMaterialHolder, bestArtifactsHolder, bestWeaponsHolder, skillPriorityHolder;
-    private RecyclerView ascensionRecyclerView, talentRecyclerView, bestArtifactsRecyclerView, bestWeaponsRecyclerView, skillPriorityRecyclerView;
-    private CharMaterialAdapter ascensionAdapter, talentAdapter, bestArtifactsAdapter, bestWeaponsAdapter, skillPriorityAdapter;
-    private List<CharMaterialData> ascensionMaterialList, talentMaterialList, bestArtifactsList, bestWeaponsList, skillPriorityList;
+    private ImageView ascensionArrow, bestArtifactsArrow, bestWeaponsArrow, skillPriorityArrow;
+    private LinearLayout ascensionMaterialHolder, bestArtifactsHolder, bestWeaponsHolder, skillPriorityHolder;
+    private RecyclerView ascensionRecyclerView, bestArtifactsRecyclerView, bestWeaponsRecyclerView, skillPriorityRecyclerView;
+    private CharMaterialAdapter ascensionAdapter, bestArtifactsAdapter, bestWeaponsAdapter, skillPriorityAdapter;
+    private List<CharMaterialData> ascensionMaterialList, bestArtifactsList, bestWeaponsList, skillPriorityList;
 
     @Nullable
     @Override
@@ -42,8 +42,6 @@ public class IndivCharFragment extends Fragment {
         imgHolder = view.findViewById(R.id.charImg);
         ascensionMaterialHolder = view.findViewById(R.id.ascensionMaterialHolder);
         ascensionRecyclerView = view.findViewById(R.id.ascensionRecyclerView);
-        talentMaterialHolder = view.findViewById(R.id.talentMaterialHolder);
-        talentRecyclerView = view.findViewById(R.id.talentRecyclerView);
         bestArtifactsHolder = view.findViewById(R.id.bestArtifactsHolder);
         bestArtifactsRecyclerView = view.findViewById(R.id.bestArtifactsRecyclerView);
         bestWeaponsHolder = view.findViewById(R.id.bestWeaponsHolder);
@@ -53,14 +51,12 @@ public class IndivCharFragment extends Fragment {
         btnClose = view.findViewById(R.id.btn_close);
 
         ascensionArrow = view.findViewById(R.id.ascensionArrow);
-        talentArrow = view.findViewById(R.id.talentArrow);
         bestArtifactsArrow = view.findViewById(R.id.bestArtifactsArrow);
         bestWeaponsArrow = view.findViewById(R.id.bestWeaponsArrow);
         skillPriorityArrow = view.findViewById(R.id.skillPriorityArrow);
 
         // Initialize RecyclerViews with LayoutManagers
         ascensionRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        talentRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         bestArtifactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         bestWeaponsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         skillPriorityRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -93,7 +89,6 @@ public class IndivCharFragment extends Fragment {
 
     private void setUpCollapsibleSections() {
         ascensionArrow.setOnClickListener(v -> toggleVisibility(ascensionMaterialHolder, ascensionArrow));
-        talentArrow.setOnClickListener(v -> toggleVisibility(talentMaterialHolder, talentArrow));
         bestArtifactsArrow.setOnClickListener(v -> toggleVisibility(bestArtifactsHolder, bestArtifactsArrow));
         bestWeaponsArrow.setOnClickListener(v -> toggleVisibility(bestWeaponsHolder, bestWeaponsArrow));
         skillPriorityArrow.setOnClickListener(v -> toggleVisibility(skillPriorityHolder, skillPriorityArrow));
@@ -141,15 +136,6 @@ public class IndivCharFragment extends Fragment {
 //            ascensionMaterialList.add(new CharMaterialData("Total Mora", charData.ascensionMora));
             ascensionAdapter = new CharMaterialAdapter(ascensionMaterialList);
             ascensionRecyclerView.setAdapter(ascensionAdapter);
-
-            // Talent Material
-            talentMaterialList = new ArrayList<>();
-            for (Map.Entry<String, Integer> entry : charData.talentRequirements.entrySet()) { // Assuming you have a similar structure for talents
-                talentMaterialList.add(new CharMaterialData(entry.getKey(), entry.getValue()));
-            }
-            talentMaterialList.add(new CharMaterialData("Total Mora", charData.talentMora));
-            talentAdapter = new CharMaterialAdapter(talentMaterialList);
-            talentRecyclerView.setAdapter(talentAdapter);
 
             // Best Artifacts
             bestArtifactsList = new ArrayList<>();

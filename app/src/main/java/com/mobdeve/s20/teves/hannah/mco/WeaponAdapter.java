@@ -1,5 +1,6 @@
 package com.mobdeve.s20.teves.hannah.mco;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +16,12 @@ import java.util.List;
 public class WeaponAdapter extends RecyclerView.Adapter<WeaponViewHolder> {
     private List<WeaponData> weaponDataList;
     private boolean isDetailView; // Flag to check if in detail view
+    private Context context;
 
-    public WeaponAdapter(List<WeaponData> weaponDataList, boolean isDetailView) {
+    public WeaponAdapter(List<WeaponData> weaponDataList, boolean isDetailView, Context context) {
         this.weaponDataList = weaponDataList;
         this.isDetailView = isDetailView;
+        this.context = context;
     }
 
     @NonNull
@@ -33,14 +36,16 @@ public class WeaponAdapter extends RecyclerView.Adapter<WeaponViewHolder> {
         WeaponData weaponData = weaponDataList.get(position);
 
         if (isDetailView) {
-            holder.bindIndividualWeapon(weaponData);
+            holder.bindIndividualWeapon(weaponData, context);
         } else {
-            holder.bindWeapon(weaponData);
+            holder.bindWeapon(weaponData, context);
+
             holder.view.setOnClickListener(v -> {
                 Fragment indivWeaponFragment = new IndivWeaponFragment();
                 Bundle args = new Bundle();
                 args.putString("WEAPON_NAME", weaponData.name);
                 indivWeaponFragment.setArguments(args);
+
                 // Replace the fragment in the container
                 ((AppCompatActivity) v.getContext()).getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, indivWeaponFragment)

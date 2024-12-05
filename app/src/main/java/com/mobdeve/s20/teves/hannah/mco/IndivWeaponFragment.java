@@ -15,6 +15,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +56,11 @@ public class IndivWeaponFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             String weaponName = args.getString("WEAPON_NAME");
-            WeaponData weaponData = getWeaponDataByName(weaponName);
-            displayWeaponData(weaponData);
+            getWeaponDataByName(weaponName, charData -> {
+                if (charData != null) {
+                    displayWeaponData(charData);
+                }
+            });
         }
 
         // Set OnClickListener to toggle visibility of refine materials
@@ -85,20 +90,29 @@ public class IndivWeaponFragment extends Fragment {
         isRefineSectionVisible = !isRefineSectionVisible; // Toggle state
     }
 
-    private WeaponData getWeaponDataByName(String weaponName) {
-        List<WeaponData> allWeaponData = WeaponData.getWeaponData();
-        for (WeaponData data : allWeaponData) {
-            if (data.name.equals(weaponName)) {
-                return data;
+    public interface WeaponDataCallback {
+        void onWeaponDataFetched(WeaponData weaponData);
+    }
+
+    private void getWeaponDataByName(String weaponName, WeaponDataCallback callback) {
+        WeaponData.getWeaponData(requireContext(), weaponDataList -> {
+            for (WeaponData data : weaponDataList) {
+                if (data.name.equals(weaponName)) {
+                    callback.onWeaponDataFetched(data);
+                    return;
+                }
             }
-        }
-        return null;
+            callback.onWeaponDataFetched(null);
+        });
     }
 
     private void displayWeaponData(WeaponData weaponData) {
         if (weaponData != null) {
             nameHolder.setText(weaponData.name);
-            imgHolder.setImageResource(weaponData.getWeaponImg());
+            Picasso.get()
+                    .load(weaponData.getWeaponImgUrl()) // Pass the URL string
+                    .error(R.drawable.ic_character_lumine) // Optional: Image to show on error
+                    .into(imgHolder);
 
             // Convert refine requirements to list of RefineMaterial
             refineMaterialList = new ArrayList<>();
@@ -107,10 +121,6 @@ public class IndivWeaponFragment extends Fragment {
             for (Map.Entry<String, Integer> entry : weaponData.refineRequirements.entrySet()) {
                 refineMaterialList.add(new RefineMaterialData(entry.getKey(), entry.getValue()));
             }
-
-            // Add Mora and Crystals as extra refine materials
-            refineMaterialList.add(new RefineMaterialData("Total Mora", weaponData.refineMora));
-            refineMaterialList.add(new RefineMaterialData("Total Crystals", weaponData.refineCrystal));
 
             // Initialize and set the adapter
             adapter = new RefineMaterialAdapter(refineMaterialList);
