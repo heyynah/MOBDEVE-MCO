@@ -10,7 +10,6 @@ import android.content.Context;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
-import android.text.style.RelativeSizeSpan;
 
 public class CharViewHolder extends RecyclerView.ViewHolder {
     // TextView for character name

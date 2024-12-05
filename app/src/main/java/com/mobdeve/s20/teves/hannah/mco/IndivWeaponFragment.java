@@ -5,9 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -23,10 +26,14 @@ import java.util.Map;
 
 public class IndivWeaponFragment extends Fragment {
 
+    private WeaponData weaponData;
+
     private TextView nameHolder;
+    private ImageButton favButton;
     private ImageView imgHolder;
     private Button btnClose;
-
+    private TextView weaponType;
+    private TextView weaponDescription;
     private ImageView refineArrow;
     private LinearLayout refineMaterialsSection;
     private RecyclerView recyclerView;
@@ -43,7 +50,10 @@ public class IndivWeaponFragment extends Fragment {
 
         // Initialize Views
         nameHolder = view.findViewById(R.id.weaponName);
+        favButton = view.findViewById(R.id.favButton);
         imgHolder = view.findViewById(R.id.weaponImg);
+        weaponType = view.findViewById(R.id.weaponType);
+        weaponDescription = view.findViewById(R.id.weaponDesc);
         btnClose = view.findViewById(R.id.btn_close);
         refineArrow = view.findViewById(R.id.refineArrow);
         refineMaterialsSection = view.findViewById(R.id.refineMaterialsSection);
@@ -56,9 +66,10 @@ public class IndivWeaponFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             String weaponName = args.getString("WEAPON_NAME");
-            getWeaponDataByName(weaponName, charData -> {
-                if (charData != null) {
-                    displayWeaponData(charData);
+            getWeaponDataByName(weaponName, weaponData -> {
+                if (weaponData != null) {
+                    this.weaponData = weaponData;
+                    displayWeaponData(weaponData);
                 }
             });
         }
@@ -71,10 +82,45 @@ public class IndivWeaponFragment extends Fragment {
             WeaponFragment weaponFragment = new WeaponFragment();
             requireActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, weaponFragment)
+                    .addToBackStack(null)
                     .commit();
         });
 
+        favButton.setOnClickListener(v -> {
+            if (weaponData != null) {
+                boolean isFavorite = !weaponData.getIsFavorite();
+                weaponData.setIsFavorite(isFavorite);
+                updateFavoriteButtonState(isFavorite); // Update the button's appearance immediately
+                updateFavoriteInFirestore(weaponData.getName().toLowerCase(), isFavorite);
+            }
+        });
         return view;
+    }
+
+    private void updateFavoriteInFirestore(String weaponName, boolean isFavorite) {
+        // Make the weaponName lowercase to match the document ID in Firestore and remove spaces and special characters
+        weaponName = weaponName.toLowerCase().replaceAll("[^a-zA-Z0-9]", "");
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("weapons").document(weaponName)
+                .update("isFavorite", isFavorite)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(requireContext(), "Favorite status updated.", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "Failed to update favorite status.", Toast.LENGTH_SHORT).show();
+                    // Revert the UI change in case of failure
+                    weaponData.setIsFavorite(!isFavorite);
+                    updateFavoriteButtonState(!isFavorite);
+                });
+    }
+
+    private void updateFavoriteButtonState(boolean isFavorite) {
+        if (isFavorite) {
+            favButton.setImageResource(R.drawable.ic_star);
+        } else {
+            favButton.setImageResource(R.drawable.ic_star_border);
+        }
     }
 
     private void toggleRefineMaterialsVisibility() {
@@ -109,6 +155,9 @@ public class IndivWeaponFragment extends Fragment {
     private void displayWeaponData(WeaponData weaponData) {
         if (weaponData != null) {
             nameHolder.setText(weaponData.name);
+            updateFavoriteButtonState(weaponData.getIsFavorite());
+            weaponType.setText(weaponData.getWeaponType());
+            weaponDescription.setText(weaponData.getWeaponDescription());
             Picasso.get()
                     .load(weaponData.getWeaponImgUrl()) // Pass the URL string
                     .error(R.drawable.ic_character_lumine) // Optional: Image to show on error

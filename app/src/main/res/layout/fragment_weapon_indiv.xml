@@ -34,6 +34,16 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <ImageButton
+        android:id="@+id/favButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginStart="20dp"
+        android:background="@drawable/circle_background"
+        android:src="@drawable/ic_star_border"
+        android:contentDescription="Favorite Button" />
+
     <Button
         android:id="@+id/btn_close"
         android:layout_width="60dp"
@@ -73,6 +83,33 @@
             android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold"/>
+
+        <!-- Character Element Section -->
+        <TextView
+            android:id="@+id/weaponType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textAlignment="center"/>
+
+        <!-- Weapon Description Section -->
+        <TextView
+            android:id="@+id/weaponDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:lineSpacingExtra="5dp"
+            android:layout_marginBottom="20dp"
+            android:textAlignment="center"/>
+
+        <!-- Break line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/white"
+            android:layout_marginBottom="20dp"/>
 
         <!-- Refine Requirements Section -->
         <LinearLayout

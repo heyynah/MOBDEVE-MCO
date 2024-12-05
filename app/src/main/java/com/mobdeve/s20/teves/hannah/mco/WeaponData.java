@@ -23,13 +23,20 @@ import java.util.Map;
 public class WeaponData {
     String name;
     String weaponImg;
+    String weaponType;
+    String weaponDescription;
     Map<String, Integer> refineRequirements;
+    boolean isFavorite;
 
     // Optimized constructor
-    public WeaponData(String name, String weaponImg, Map<String, Integer> refineRequirements) {
+    public WeaponData(String name, String weaponImg, String weaponType, String weaponDescription,
+                      Map<String, Integer> refineRequirements, boolean isFavorite) {
         this.name = name;
         this.weaponImg = weaponImg;
+        this.weaponType = weaponType;
+        this.weaponDescription = weaponDescription;
         this.refineRequirements = refineRequirements;
+        this.isFavorite = isFavorite;
     }
 
     // Getter for name
@@ -39,6 +46,22 @@ public class WeaponData {
 
     public String getWeaponImgUrl() {
         return this.weaponImg;
+    }
+
+    public String getWeaponType() {
+        return this.weaponType;
+    }
+
+    public String getWeaponDescription() {
+        return this.weaponDescription;
+    }
+
+    public boolean getIsFavorite() {
+        return this.isFavorite;
+    }
+
+    public void setIsFavorite(boolean isFavorite) {
+        this.isFavorite = isFavorite;
     }
 
     public interface WeaponDataCallback {
@@ -65,10 +88,10 @@ public class WeaponData {
     // Fetch weapon data from Firebase and API
     public static void getWeaponData(final Context context, final WeaponDataCallback callback) {
         List<WeaponData> weaponList = new ArrayList<>();
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        // Fetch the list of document names under the weapons collection
         db.collection("weapons").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 List<String> weaponNames = new ArrayList<>();
@@ -76,61 +99,51 @@ public class WeaponData {
                     weaponNames.add(document.getId());
                 }
 
-                // Fetch weapon data for each document name
                 for (String weaponName : weaponNames) {
                     String apiUrl = "https://genshin-db-api.vercel.app/api/v5/weapons?query=" + weaponName;
 
-                    // Create the JsonObjectRequest for fetching the weapon data
                     JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, apiUrl, null,
-                            new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    try {
-                                        // Parse the JSON response for weapon data
-                                        String name = response.getString("name");
-                                        String weaponImg = response.getJSONObject("images").getString("icon");
+                            response -> {
+                                try {
+                                    String name = response.getString("name");
+                                    String weaponImgUrl = response.getJSONObject("images").getString("icon");
+                                    String weaponType = response.getString("weaponText");
+                                    String weaponDescription = response.getString("description");
 
-                                        // Fetch and parse refinement materials
-                                        Map<String, Integer> refinementRequirements = getRefineMaterials(response.getJSONObject("costs"));
+                                    Map<String, Integer> refineRequirements = getRefineMaterials(response.getJSONObject("costs"));
 
-                                        // Firestore query to fetch other weapon data
-                                        db.collection("weapons").document(weaponName).get()
-                                                .addOnSuccessListener(documentSnapshot -> {
-                                                    if (documentSnapshot.exists()) {
-                                                        // Create a WeaponData object with the combined data
-                                                        WeaponData weaponData = new WeaponData(
-                                                                name,
-                                                                weaponImg,
-                                                                refinementRequirements
-                                                        );
+                                    db.collection("weapons").document(weaponName).get()
+                                            .addOnSuccessListener(documentSnapshot -> {
+                                                if (documentSnapshot.exists()) {
+                                                    boolean isFavorite = (boolean) documentSnapshot.get("isFavorite");
 
-                                                        // Add the weapon data to the list
-                                                        weaponList.add(weaponData);
+                                                    WeaponData weaponData = new WeaponData(
+                                                            name,
+                                                            weaponImgUrl,
+                                                            weaponType,
+                                                            weaponDescription,
+                                                            refineRequirements,
+                                                            isFavorite
+                                                    );
 
-                                                        // Check if all weapon data has been fetched
-                                                        if (weaponList.size() == weaponNames.size()) {
-                                                            // Sort the list by weapon name
-                                                            weaponList.sort(Comparator.comparing(WeaponData::getName));
-                                                            callback.onWeaponDataFetched(weaponList);
-                                                        }
-                                                    } else {
-                                                        Log.e("Firebase", "No such document");
+                                                    weaponList.add(weaponData);
+
+                                                    if (weaponList.size() == weaponNames.size()) {
+                                                        weaponList.sort(Comparator.comparing(WeaponData::getIsFavorite).reversed()
+                                                                .thenComparing(WeaponData::getName));
+                                                        callback.onWeaponDataFetched(weaponList);
                                                     }
-                                                })
-                                                .addOnFailureListener(e -> Log.e("Firebase", "Error fetching document", e));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                        Log.e("WeaponData", "Failed to parse weapon data", e);
-                                    }
+                                                } else {
+                                                    Log.e("Firebase", "No such document");
+                                                }
+                                            })
+                                            .addOnFailureListener(e -> Log.e("Firebase", "Error fetching document", e));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    Log.e("WeaponData", "Failed to parse weapon data", e);
                                 }
                             },
-                            new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Log.e("VolleyError", error.getMessage(), error);
-                                }
-                            });
-                    // Add the request to the Volley request queue
+                            error -> Log.e("VolleyError", error.getMessage(), error));
                     requestQueue.add(request);
                 }
             } else {

@@ -7,6 +7,10 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide; // Add this for Glide
 import android.content.Context; // To access context if needed
 
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ImageSpan;
+
 public class WeaponViewHolder extends RecyclerView.ViewHolder {
     // TextView for character name
     TextView weaponName;
@@ -25,7 +29,14 @@ public class WeaponViewHolder extends RecyclerView.ViewHolder {
 
     // Method to bind character list data
     public void bindWeapon(WeaponData weaponData, Context context) {
-        weaponName.setText(weaponData.name);
+        String name = weaponData.getName();
+        SpannableString spannableString = new SpannableString(name);
+        if (weaponData.getIsFavorite()) {
+            spannableString = new SpannableString(name + " ★");
+            ImageSpan starSpan = new ImageSpan(context, R.drawable.ic_star);
+            spannableString.setSpan(starSpan, name.length(), name.length() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        weaponName.setText(spannableString);
 
         // Load image using Glide
         Glide.with(context)
@@ -36,7 +47,14 @@ public class WeaponViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bindIndividualWeapon(WeaponData weaponData, Context context) {
-        weaponName.setText(weaponData.name);
+        String name = weaponData.getName();
+        SpannableString spannableString = new SpannableString(name);
+        if (weaponData.getIsFavorite()) {
+            spannableString = new SpannableString(name + " ★");
+            ImageSpan starSpan = new ImageSpan(context, R.drawable.ic_star);
+            spannableString.setSpan(starSpan, name.length(), name.length() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        weaponName.setText(spannableString);
 
         Glide.with(context)
                 .load(weaponData.getWeaponImgUrl()) // Load the image URL
