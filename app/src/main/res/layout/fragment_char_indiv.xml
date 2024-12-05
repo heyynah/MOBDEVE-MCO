@@ -64,15 +64,73 @@
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"/>
 
-        <TextView
-            android:id="@+id/charName"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:textAlignment="center"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/charName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:fontFamily="sans-serif-medium"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+        <!-- Character Details Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/charElement"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:textAlignment="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:text=" | "
+                android:textAlignment="center"/>
+
+            <TextView
+                android:id="@+id/charWeapon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:textAlignment="center"/>
+        </LinearLayout>
+
+        <!-- Character Description Section -->
+        <TextView
+            android:id="@+id/charDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:textSize="24sp"
-            android:textStyle="bold"/>
+            android:textSize="15sp"
+            android:lineSpacingExtra="5dp"
+            android:layout_marginBottom="20dp"
+            android:textAlignment="center"/>
+
+        <!-- Break line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/white"
+            android:layout_marginBottom="20dp"/>
 
         <!-- Ascension Requirements Section -->
         <LinearLayout

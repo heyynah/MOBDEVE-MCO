@@ -26,6 +26,9 @@ public class IndivCharFragment extends Fragment {
     private TextView nameHolder;
     private ImageView imgHolder;
     private Button btnClose;
+    private TextView charElement;
+    private TextView charWeapon;
+    private TextView charDescription;
     private ImageView ascensionArrow, bestArtifactsArrow, bestWeaponsArrow, skillPriorityArrow;
     private LinearLayout ascensionMaterialHolder, bestArtifactsHolder, bestWeaponsHolder, skillPriorityHolder;
     private RecyclerView ascensionRecyclerView, bestArtifactsRecyclerView, bestWeaponsRecyclerView, skillPriorityRecyclerView;
@@ -40,6 +43,9 @@ public class IndivCharFragment extends Fragment {
         // Initialize views
         nameHolder = view.findViewById(R.id.charName);
         imgHolder = view.findViewById(R.id.charImg);
+        charElement = view.findViewById(R.id.charElement);
+        charWeapon = view.findViewById(R.id.charWeapon);
+        charDescription = view.findViewById(R.id.charDesc);
         ascensionMaterialHolder = view.findViewById(R.id.ascensionMaterialHolder);
         ascensionRecyclerView = view.findViewById(R.id.ascensionRecyclerView);
         bestArtifactsHolder = view.findViewById(R.id.bestArtifactsHolder);
@@ -123,6 +129,9 @@ public class IndivCharFragment extends Fragment {
     private void displayCharacterData(CharData charData) {
         if (charData != null) {
             nameHolder.setText(charData.name);
+            charElement.setText(charData.getCharElementType());
+            charWeapon.setText(charData.getCharWeaponType());
+            charDescription.setText(charData.getCharDescription());
             Picasso.get()
                     .load(charData.getCharImgUrl()) // Pass the URL string
                     .error(R.drawable.ic_character_aether) // Optional: Image to show on error
@@ -133,7 +142,6 @@ public class IndivCharFragment extends Fragment {
             for (Map.Entry<String, Integer> entry : charData.ascensionRequirements.entrySet()) {
                 ascensionMaterialList.add(new CharMaterialData(entry.getKey(), entry.getValue()));
             }
-//            ascensionMaterialList.add(new CharMaterialData("Total Mora", charData.ascensionMora));
             ascensionAdapter = new CharMaterialAdapter(ascensionMaterialList);
             ascensionRecyclerView.setAdapter(ascensionAdapter);
 

@@ -25,6 +25,9 @@ import java.util.Map;
 public class CharData {
     String name;
     String charImgUrl; // Changed to String for URL images
+    String charElementType;
+    String charWeaponType;
+    String charDescription;
     Map<String, Integer> ascensionRequirements;
     int ascensionMora;
     List<String> bestArtifactSets;
@@ -33,6 +36,9 @@ public class CharData {
 
     public CharData(String name,
                     String charImgUrl,
+                    String charElementType,
+                    String charWeaponType,
+                    String charDescription,
                     Map<String, Integer> ascensionRequirements,
                     int ascensionMora,
                     List<String> bestArtifactSets,
@@ -40,6 +46,9 @@ public class CharData {
                     String skillPrio) {
         this.name = name;
         this.charImgUrl = charImgUrl;
+        this.charElementType = charElementType;
+        this.charWeaponType = charWeaponType;
+        this.charDescription = charDescription;
         this.ascensionRequirements = ascensionRequirements;
         this.ascensionMora = ascensionMora;
         this.bestArtifactSets = bestArtifactSets;
@@ -55,6 +64,21 @@ public class CharData {
     // Getter for charImgUrl
     public String getCharImgUrl() {
         return this.charImgUrl;
+    }
+
+    // Getter for charElementType
+    public String getCharElementType() {
+        return this.charElementType;
+    }
+
+    // Getter for charWeaponType
+    public String getCharWeaponType() {
+        return this.charWeaponType;
+    }
+
+    // Getter for charDescription
+    public String getCharDescription() {
+        return this.charDescription;
     }
 
     public interface CharacterDataCallback {
@@ -108,6 +132,9 @@ public class CharData {
                                         // Parse the JSON response for character data
                                         String name = response.getString("name");
                                         String charImgUrl = response.getJSONObject("images").getString("hoyolab-avatar");
+                                        String charElementType = response.getString("elementText");
+                                        String charWeaponType = response.getString("weaponText");
+                                        String charDescription = response.getString("description");
 
                                         // Fetch and parse ascension materials
                                         Map<String, Integer> ascensionRequirements = getAscensionMaterials(response.getJSONObject("costs"));
@@ -117,9 +144,6 @@ public class CharData {
                                                 .addOnSuccessListener(documentSnapshot -> {
                                                     if (documentSnapshot.exists()) {
                                                         // Parse the data from Firestore
-                                                        Map<String, Integer> talentRequirements = new HashMap<>();
-                                                        Long talentMoraLong = documentSnapshot.getLong("talentMora");
-                                                        int talentMora = (talentMoraLong != null) ? talentMoraLong.intValue() : 0;
                                                         List<String> bestArtifactSets = (List<String>) documentSnapshot.get("bestArtifactSets");
                                                         List<String> bestWeapons = (List<String>) documentSnapshot.get("bestWeapons");
                                                         String skillPrio = (String) documentSnapshot.get("skillPrio");
@@ -128,6 +152,9 @@ public class CharData {
                                                         CharData charData = new CharData(
                                                                 name,
                                                                 charImgUrl,
+                                                                charElementType,
+                                                                charWeaponType,
+                                                                charDescription,
                                                                 ascensionRequirements,
                                                                 0, // Placeholder for ascensionMora
                                                                 bestArtifactSets,
