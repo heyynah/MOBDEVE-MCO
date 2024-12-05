@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
             if (selectedFragment != null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, selectedFragment)
+                        .addToBackStack(null)
                         .commit();
             }
 
@@ -77,6 +78,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment(dailyTasks, adapter)).commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     public void refreshHome() {
