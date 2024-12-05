@@ -33,6 +33,7 @@ public class CharData {
     List<String> bestArtifactSets;
     List<String> bestWeapons;
     String skillPrio;
+    boolean isFavorite;
 
     public CharData(String name,
                     String charImgUrl,
@@ -43,7 +44,8 @@ public class CharData {
                     int ascensionMora,
                     List<String> bestArtifactSets,
                     List<String> bestWeapons,
-                    String skillPrio) {
+                    String skillPrio,
+                    boolean isFavorite) {
         this.name = name;
         this.charImgUrl = charImgUrl;
         this.charElementType = charElementType;
@@ -54,6 +56,7 @@ public class CharData {
         this.bestArtifactSets = bestArtifactSets;
         this.bestWeapons = bestWeapons;
         this.skillPrio = skillPrio;
+        this.isFavorite = isFavorite;
     }
 
     // Getter for name
@@ -79,6 +82,14 @@ public class CharData {
     // Getter for charDescription
     public String getCharDescription() {
         return this.charDescription;
+    }
+
+    public boolean getIsFavorite() {
+        return this.isFavorite;
+    }
+
+    public void setIsFavorite(boolean isFavorite) {
+        this.isFavorite = isFavorite;
     }
 
     public interface CharacterDataCallback {
@@ -107,11 +118,8 @@ public class CharData {
         List<CharData> charList = new ArrayList<>();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // Initialize Volley RequestQueue
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        // Fetch the list of document names under the characters collection
         db.collection("characters").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 List<String> charNames = new ArrayList<>();
@@ -119,76 +127,60 @@ public class CharData {
                     charNames.add(document.getId());
                 }
 
-                // Fetch character data for each document name
                 for (String charName : charNames) {
                     String apiUrl = "https://genshin-db-api.vercel.app/api/v5/characters?query=" + charName;
 
-                    // Create the JsonObjectRequest for fetching the character data
                     JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, apiUrl, null,
-                            new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    try {
-                                        // Parse the JSON response for character data
-                                        String name = response.getString("name");
-                                        String charImgUrl = response.getJSONObject("images").getString("hoyolab-avatar");
-                                        String charElementType = response.getString("elementText");
-                                        String charWeaponType = response.getString("weaponText");
-                                        String charDescription = response.getString("description");
+                            response -> {
+                                try {
+                                    String name = response.getString("name");
+                                    String charImgUrl = response.getJSONObject("images").getString("hoyolab-avatar");
+                                    String charElementType = response.getString("elementText");
+                                    String charWeaponType = response.getString("weaponText");
+                                    String charDescription = response.getString("description");
 
-                                        // Fetch and parse ascension materials
-                                        Map<String, Integer> ascensionRequirements = getAscensionMaterials(response.getJSONObject("costs"));
+                                    Map<String, Integer> ascensionRequirements = getAscensionMaterials(response.getJSONObject("costs"));
 
-                                        // Firestore query to fetch other character data
-                                        db.collection("characters").document(charName).get()
-                                                .addOnSuccessListener(documentSnapshot -> {
-                                                    if (documentSnapshot.exists()) {
-                                                        // Parse the data from Firestore
-                                                        List<String> bestArtifactSets = (List<String>) documentSnapshot.get("bestArtifactSets");
-                                                        List<String> bestWeapons = (List<String>) documentSnapshot.get("bestWeapons");
-                                                        String skillPrio = (String) documentSnapshot.get("skillPrio");
+                                    db.collection("characters").document(charName).get()
+                                            .addOnSuccessListener(documentSnapshot -> {
+                                                if (documentSnapshot.exists()) {
+                                                    List<String> bestArtifactSets = (List<String>) documentSnapshot.get("bestArtifactSets");
+                                                    List<String> bestWeapons = (List<String>) documentSnapshot.get("bestWeapons");
+                                                    String skillPrio = (String) documentSnapshot.get("skillPrio");
+                                                    boolean isFavorite = (boolean) documentSnapshot.get("isFavorite");
 
-                                                        // Create a CharData object with the combined data
-                                                        CharData charData = new CharData(
-                                                                name,
-                                                                charImgUrl,
-                                                                charElementType,
-                                                                charWeaponType,
-                                                                charDescription,
-                                                                ascensionRequirements,
-                                                                0, // Placeholder for ascensionMora
-                                                                bestArtifactSets,
-                                                                bestWeapons,
-                                                                skillPrio
-                                                        );
+                                                    CharData charData = new CharData(
+                                                            name,
+                                                            charImgUrl,
+                                                            charElementType,
+                                                            charWeaponType,
+                                                            charDescription,
+                                                            ascensionRequirements,
+                                                            0,
+                                                            bestArtifactSets,
+                                                            bestWeapons,
+                                                            skillPrio,
+                                                            isFavorite
+                                                    );
 
-                                                        // Add the character data to the list
-                                                        charList.add(charData);
+                                                    charList.add(charData);
 
-                                                        // Check if all character data has been fetched
-                                                        if (charList.size() == charNames.size()) {
-                                                            // Sort the list by character name
-                                                            charList.sort(Comparator.comparing(CharData::getName));
-                                                            callback.onCharacterDataFetched(charList);
-                                                        }
-                                                    } else {
-                                                        Log.e("Firebase", "No such document");
+                                                    if (charList.size() == charNames.size()) {
+                                                        charList.sort(Comparator.comparing(CharData::getIsFavorite).reversed()
+                                                                .thenComparing(CharData::getName));
+                                                        callback.onCharacterDataFetched(charList);
                                                     }
-                                                })
-                                                .addOnFailureListener(e -> Log.e("Firebase", "Error fetching document", e));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                        Log.e("CharData", "Failed to parse character data", e);
-                                    }
+                                                } else {
+                                                    Log.e("Firebase", "No such document");
+                                                }
+                                            })
+                                            .addOnFailureListener(e -> Log.e("Firebase", "Error fetching document", e));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    Log.e("CharData", "Failed to parse character data", e);
                                 }
                             },
-                            new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Log.e("VolleyError", error.getMessage(), error);
-                                }
-                            });
-                    // Add the request to the Volley request queue
+                            error -> Log.e("VolleyError", error.getMessage(), error));
                     requestQueue.add(request);
                 }
             } else {

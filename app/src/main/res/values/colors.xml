@@ -2,13 +2,16 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="yellow">#FFFF00</color>
 
     <!--    <color name="background_color">#0C1035</color>-->
     <!--    <color name="custom_card_color">#CAC383</color>-->
     <!--    <color name="custom_text_color">#4F3D06</color>-->
     <color name="background_color">#0d0612</color>
     <color name="semi_transparent_dark_tint">#66000000</color>
+    <color name="semi_transparent_white">#80FFFFFF</color>
 
     <color name="custom_card_color">#5e468b</color>
     <color name="custom_text_color">#F2E6FD</color>
+
 </resources>

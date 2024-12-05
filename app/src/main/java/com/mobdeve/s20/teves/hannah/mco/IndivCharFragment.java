@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
+import com.google.firebase.firestore.FirebaseFirestore;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +26,10 @@ import java.util.Map;
 
 public class IndivCharFragment extends Fragment {
 
+    private CharData charData;
+
     private TextView nameHolder;
+    private ImageButton favButton;
     private ImageView imgHolder;
     private Button btnClose;
     private TextView charElement;
@@ -42,6 +48,7 @@ public class IndivCharFragment extends Fragment {
 
         // Initialize views
         nameHolder = view.findViewById(R.id.charName);
+        favButton = view.findViewById(R.id.favButton);
         imgHolder = view.findViewById(R.id.charImg);
         charElement = view.findViewById(R.id.charElement);
         charWeapon = view.findViewById(R.id.charWeapon);
@@ -76,6 +83,7 @@ public class IndivCharFragment extends Fragment {
             String charName = args.getString("CHAR_NAME");
             getCharacterDataByName(charName, charData -> {
                 if (charData != null) {
+                    this.charData = charData;
                     displayCharacterData(charData);
                 }
             });
@@ -90,8 +98,41 @@ public class IndivCharFragment extends Fragment {
                     .commit();
         });
 
+        favButton.setOnClickListener(v -> {
+            if (charData != null) {
+                boolean isFavorite = !charData.getIsFavorite();
+                charData.setIsFavorite(isFavorite);
+                updateFavoriteButtonState(isFavorite); // Update the button's appearance immediately
+                updateFavoriteInFirestore(charData.getName().toLowerCase(), isFavorite);
+            }
+        });
+
         return view;
     }
+
+    private void updateFavoriteInFirestore(String charName, boolean isFavorite) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("characters").document(charName)
+                .update("isFavorite", isFavorite)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(requireContext(), "Favorite status updated.", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "Failed to update favorite status.", Toast.LENGTH_SHORT).show();
+                    // Revert the UI change in case of failure
+                    charData.setIsFavorite(!isFavorite);
+                    updateFavoriteButtonState(!isFavorite);
+                });
+    }
+
+    private void updateFavoriteButtonState(boolean isFavorite) {
+        if (isFavorite) {
+            favButton.setImageResource(R.drawable.ic_star);
+        } else {
+            favButton.setImageResource(R.drawable.ic_star_border);
+        }
+    }
+
 
     private void setUpCollapsibleSections() {
         ascensionArrow.setOnClickListener(v -> toggleVisibility(ascensionMaterialHolder, ascensionArrow));
@@ -103,10 +144,10 @@ public class IndivCharFragment extends Fragment {
     private void toggleVisibility(View view, ImageView arrow) {
         if (view.getVisibility() == View.VISIBLE) {
             view.setVisibility(View.GONE);
-            arrow.setImageResource(R.drawable.ic_arrow_up);
+            arrow.setImageResource(R.drawable.ic_arrow_down);
         } else {
             view.setVisibility(View.VISIBLE);
-            arrow.setImageResource(R.drawable.ic_arrow_down);
+            arrow.setImageResource(R.drawable.ic_arrow_up);
         }
     }
 
@@ -129,6 +170,7 @@ public class IndivCharFragment extends Fragment {
     private void displayCharacterData(CharData charData) {
         if (charData != null) {
             nameHolder.setText(charData.name);
+            updateFavoriteButtonState(charData.getIsFavorite());
             charElement.setText(charData.getCharElementType());
             charWeapon.setText(charData.getCharWeaponType());
             charDescription.setText(charData.getCharDescription());
