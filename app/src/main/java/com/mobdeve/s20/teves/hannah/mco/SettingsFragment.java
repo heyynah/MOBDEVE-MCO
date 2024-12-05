@@ -1,10 +1,13 @@
-// SettingsFragment.java
 package com.mobdeve.s20.teves.hannah.mco;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +19,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.util.Calendar;
+
 public class SettingsFragment extends Fragment {
 
+    private static final String TAG = "SettingsFragment";
     private TextView weeklyReminderTime;
     private TextView serverRegion;
     private SharedPreferences sharedPreferences;
@@ -78,11 +84,51 @@ public class SettingsFragment extends Fragment {
             editor.putString("reminderDay", day);
             editor.putString("weeklyReminderTime", time);
             editor.apply();
+
+            setWeeklyReminder(day, hour, minute);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         builder.create().show();
+    }
+
+    private void setWeeklyReminder(String day, int hour, int minute) {
+        Log.d(TAG, "setWeeklyReminder: Setting reminder for " + day + " at " + hour + ":" + minute);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        int dayOfWeek = getDayOfWeek(day);
+        calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+
+        if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
+            calendar.add(Calendar.WEEK_OF_YEAR, 1);
+        }
+
+        AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getContext(), TaskAlarmReceiver.class);
+        intent.putExtra("TASK_NAME", "It's time to do your weeklies!");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), dayOfWeek, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7, pendingIntent);
+        Log.d(TAG, "setWeeklyReminder: Alarm set for " + calendar.getTime());
+    }
+
+    private int getDayOfWeek(String day) {
+        switch (day.toLowerCase()) {
+            case "sunday": return Calendar.SUNDAY;
+            case "monday": return Calendar.MONDAY;
+            case "tuesday": return Calendar.TUESDAY;
+            case "wednesday": return Calendar.WEDNESDAY;
+            case "thursday": return Calendar.THURSDAY;
+            case "friday": return Calendar.FRIDAY;
+            case "saturday": return Calendar.SATURDAY;
+            default: return Calendar.MONDAY;
+        }
     }
 
     private void showEditServerDialog() {
