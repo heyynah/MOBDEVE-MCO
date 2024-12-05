@@ -8,6 +8,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
@@ -83,82 +84,89 @@ public class CharData {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Sample list of character names
-        List<String> charNames = new ArrayList<>();
-        charNames.add("xiao");
-        charNames.add("ganyu");
-        charNames.add("diluc");
-
         // Initialize Volley RequestQueue
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        for (String charName : charNames) {
-            String apiUrl = "https://genshin-db-api.vercel.app/api/v5/characters?query=" + charName;
+        // Fetch the list of document names under the characters collection
+        db.collection("characters").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<String> charNames = new ArrayList<>();
+                for (DocumentSnapshot document : task.getResult()) {
+                    charNames.add(document.getId());
+                }
 
-            // Create the JsonObjectRequest for fetching the character data
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, apiUrl, null,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                // Parse the JSON response for character data
-                                String name = response.getString("name");
-                                String charImgUrl = response.getJSONObject("images").getString("hoyolab-avatar");
+                // Fetch character data for each document name
+                for (String charName : charNames) {
+                    String apiUrl = "https://genshin-db-api.vercel.app/api/v5/characters?query=" + charName;
 
-                                // Fetch and parse ascension materials
-                                Map<String, Integer> ascensionRequirements = getAscensionMaterials(response.getJSONObject("costs"));
+                    // Create the JsonObjectRequest for fetching the character data
+                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, apiUrl, null,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    try {
+                                        // Parse the JSON response for character data
+                                        String name = response.getString("name");
+                                        String charImgUrl = response.getJSONObject("images").getString("hoyolab-avatar");
 
-                                // Firestore query to fetch other character data
-                                db.collection("characters").document(charName).get()
-                                .addOnSuccessListener(documentSnapshot -> {
-                                    if (documentSnapshot.exists()) {
-                                        // Parse the data from Firestore
-                                        Map<String, Integer> talentRequirements = new HashMap<>();
-                                        Long talentMoraLong = documentSnapshot.getLong("talentMora");
-                                        int talentMora = (talentMoraLong != null) ? talentMoraLong.intValue() : 0;
-                                        List<String> bestArtifactSets = (List<String>) documentSnapshot.get("bestArtifactSets");
-                                        List<String> bestWeapons = (List<String>) documentSnapshot.get("bestWeapons");
-                                        String skillPrio = (String) documentSnapshot.get("skillPrio");
+                                        // Fetch and parse ascension materials
+                                        Map<String, Integer> ascensionRequirements = getAscensionMaterials(response.getJSONObject("costs"));
 
-                                        // Create a CharData object with the combined data
-                                        CharData charData = new CharData(
-                                                name,
-                                                charImgUrl,
-                                                ascensionRequirements,
-                                                0, // Placeholder for ascensionMora
-                                                bestArtifactSets,
-                                                bestWeapons,
-                                                skillPrio
-                                        );
+                                        // Firestore query to fetch other character data
+                                        db.collection("characters").document(charName).get()
+                                                .addOnSuccessListener(documentSnapshot -> {
+                                                    if (documentSnapshot.exists()) {
+                                                        // Parse the data from Firestore
+                                                        Map<String, Integer> talentRequirements = new HashMap<>();
+                                                        Long talentMoraLong = documentSnapshot.getLong("talentMora");
+                                                        int talentMora = (talentMoraLong != null) ? talentMoraLong.intValue() : 0;
+                                                        List<String> bestArtifactSets = (List<String>) documentSnapshot.get("bestArtifactSets");
+                                                        List<String> bestWeapons = (List<String>) documentSnapshot.get("bestWeapons");
+                                                        String skillPrio = (String) documentSnapshot.get("skillPrio");
 
-                                        // Add the character data to the list
-                                        charList.add(charData);
+                                                        // Create a CharData object with the combined data
+                                                        CharData charData = new CharData(
+                                                                name,
+                                                                charImgUrl,
+                                                                ascensionRequirements,
+                                                                0, // Placeholder for ascensionMora
+                                                                bestArtifactSets,
+                                                                bestWeapons,
+                                                                skillPrio
+                                                        );
 
-                                        // Check if all character data has been fetched
-                                        if (charList.size() == charNames.size()) {
-                                            // Sort the list by character name
-                                            charList.sort(Comparator.comparing(CharData::getName));
-                                            callback.onCharacterDataFetched(charList);
-                                        }
-                                    } else {
-                                        Log.e("Firebase", "No such document");
+                                                        // Add the character data to the list
+                                                        charList.add(charData);
+
+                                                        // Check if all character data has been fetched
+                                                        if (charList.size() == charNames.size()) {
+                                                            // Sort the list by character name
+                                                            charList.sort(Comparator.comparing(CharData::getName));
+                                                            callback.onCharacterDataFetched(charList);
+                                                        }
+                                                    } else {
+                                                        Log.e("Firebase", "No such document");
+                                                    }
+                                                })
+                                                .addOnFailureListener(e -> Log.e("Firebase", "Error fetching document", e));
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        Log.e("CharData", "Failed to parse character data", e);
                                     }
-                                })
-                                .addOnFailureListener(e -> Log.e("Firebase", "Error fetching document", e));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                Log.e("CharData", "Failed to parse character data", e);
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.e("VolleyError", error.getMessage(), error);
-                        }
-                    });
-            // Add the request to the Volley request queue
-            requestQueue.add(request);
-        }
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.e("VolleyError", error.getMessage(), error);
+                                }
+                            });
+                    // Add the request to the Volley request queue
+                    requestQueue.add(request);
+                }
+            } else {
+                Log.e("Firebase", "Error getting documents: ", task.getException());
+            }
+        });
     }
 }
