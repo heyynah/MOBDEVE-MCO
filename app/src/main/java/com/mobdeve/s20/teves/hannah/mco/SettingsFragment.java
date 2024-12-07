@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class SettingsFragment extends Fragment {
 
@@ -150,11 +151,56 @@ public class SettingsFragment extends Fragment {
             editor.apply();
 
             serverRegion.setText(server);
+
+            // Set server reset notification
+            setServerResetNotification(server);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         builder.create().show();
+    }
+
+    private void setServerResetNotification(String serverRegion) {
+        Log.d(TAG, "setServerResetNotification: Setting server reset notification for region " + serverRegion);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 4);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+
+        TimeZone timeZone;
+        switch (serverRegion.toLowerCase()) {
+            case "asia":
+            case "tw, hk, mo":
+                timeZone = TimeZone.getTimeZone("GMT+8");
+                break;
+            case "europe":
+                timeZone = TimeZone.getTimeZone("GMT+1");
+                break;
+            case "america":
+                timeZone = TimeZone.getTimeZone("GMT-5");
+                break;
+            default:
+                timeZone = TimeZone.getDefault();
+                break;
+        }
+
+        calendar.setTimeZone(timeZone);
+
+        if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
+            calendar.add(Calendar.WEEK_OF_YEAR, 1);
+        }
+
+        AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getContext(), TaskAlarmReceiver.class);
+        intent.putExtra("TASK_NAME", "The server reset!");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7, pendingIntent);
+        Log.d(TAG, "setServerResetNotification: Alarm set for " + calendar.getTime());
     }
 
     private void loadSettings() {
